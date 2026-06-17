@@ -33,32 +33,16 @@ class QualityChecker:
     def check_duplicates(self) -> list[list[PhotoFile]]:
         duplicates: list[list[PhotoFile]] = []
         groups: dict[str, list[PhotoFile]] = defaultdict(list)
+        has_hash = False
         for photo in self.result.files:
             if not photo.selected:
                 continue
             if photo.hash_md5:
+                has_hash = True
                 key = f"md5:{photo.hash_md5}"
                 groups[key].append(photo)
-        duplicates.extend([g for g in groups.values() if len(g) > 1])
-
-        name_groups: dict[str, list[PhotoFile]] = defaultdict(list)
-        for photo in self.result.files:
-            if not photo.selected:
-                continue
-            key = (photo.filename.lower(), photo.size)
-            name_groups[f"{key[0]}|{key[1]}"].append(photo)
-        for g in name_groups.values():
-            if len(g) > 1:
-                dup_paths = {p.path.resolve() for p in g}
-                if len(dup_paths) <= 1:
-                    continue
-                already = False
-                for d in duplicates:
-                    if {p.path.resolve() for p in d} == dup_paths:
-                        already = True
-                        break
-                if not already:
-                    duplicates.append(g)
+        if has_hash:
+            duplicates.extend([g for g in groups.values() if len(g) > 1])
         return duplicates
 
     def check_abnormal_dimensions(self) -> list[PhotoFile]:

@@ -57,20 +57,56 @@ def _classify_by_name(name: str, current_type: FileType) -> FileType:
     return current_type
 
 
-def _classify_by_path(path: Path, current_type: FileType) -> FileType:
-    parts_lower = [p.lower() for p in path.parts]
-    full_path = str(path).lower()
-    for kw in BEHIND_KEYWORDS:
-        if kw.lower() in full_path:
-            if current_type in (FileType.RETOUCHED, FileType.UNKNOWN):
+def _match_path_keywords(path: Path) -> Optional[FileType]:
+    parent_dirs = [p.name.lower() for p in path.parents]
+    parent_dirs.reverse()
+    for i, parent in enumerate(parent_dirs):
+        for kw in ORIGINAL_KEYWORDS + ["raw"]:
+            if kw.lower() in parent:
+                return FileType.ORIGINAL
+        for kw in BEHIND_KEYWORDS:
+            if kw.lower() in parent:
                 return FileType.BEHIND
+        for kw in RETOUCH_KEYWORDS:
+            if kw.lower() in parent:
+                return FileType.RETOUCHED
+    return None
+
+
+def _classify_by_path(path: Path, current_type: FileType) -> FileType:
+    path_match = _match_path_keywords(path)
+    if path_match is not None:
+        if current_type != FileType.VIDEO:
+            return path_match
+        return current_type
+
+    full_path = str(path).lower()
     for kw in ORIGINAL_KEYWORDS + ["raw"]:
         if kw.lower() in full_path:
             if current_type in (FileType.RETOUCHED, FileType.UNKNOWN):
                 return FileType.ORIGINAL
+    for kw in BEHIND_KEYWORDS:
+        if kw.lower() in full_path:
+            if current_type in (FileType.RETOUCHED, FileType.UNKNOWN):
+                return FileType.BEHIND
     for kw in RETOUCH_KEYWORDS:
         if kw.lower() in full_path:
             if current_type == FileType.UNKNOWN:
+                return FileType.RETOUCHED
+    return current_type
+
+
+def _classify_by_name(name: str, current_type: FileType) -> FileType:
+    name_lower = name.lower()
+    if current_type in (FileType.RETOUCHED, FileType.UNKNOWN):
+        for kw in ORIGINAL_KEYWORDS:
+            if kw.lower() in name_lower:
+                return FileType.ORIGINAL
+        for kw in BEHIND_KEYWORDS:
+            if kw.lower() in name_lower:
+                return FileType.BEHIND
+        for kw in RETOUCH_KEYWORDS:
+            if kw.lower() in name_lower:
                 return FileType.RETOUCHED
     return current_type
 

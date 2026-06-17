@@ -104,7 +104,6 @@ class Packer:
 
     def pack_version(self, version: PackVersion, output_dir: Optional[Path] = None, dry_run: bool = False) -> Optional[Path]:
         out_dir = output_dir or self.context.output_dir
-        out_dir.mkdir(parents=True, exist_ok=True)
         archive_path = out_dir / self._archive_name(version)
 
         files = self._collect_files()
@@ -114,6 +113,7 @@ class Packer:
         if dry_run:
             return archive_path
 
+        out_dir.mkdir(parents=True, exist_ok=True)
         max_size = VERSION_MAX_SIZE.get(version)
         quality = VERSION_QUALITY.get(version, 85)
 

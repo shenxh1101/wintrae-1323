@@ -284,7 +284,7 @@ def pack(directory, client, date, output, template, min_rating, versions, exclud
         versions = ("full", "web")
 
     ctx = _build_context(directory, client, date, output, template, min_rating, exclude, versions)
-    scanner = FileScanner(compute_hash=False, read_exif=True)
+    scanner = FileScanner(compute_hash=True, read_exif=True)
     with console.status("[cyan]扫描文件..."):
         result = scanner.scan(directory, recursive=True)
 
@@ -292,6 +292,8 @@ def pack(directory, client, date, output, template, min_rating, versions, exclud
     selector.filter_by_rating(min_rating)
     if exclude:
         selector.filter_by_exclude_types([_parse_file_type(v) for v in exclude])
+
+    console.print(f"筛选后保留 [bold]{selector.selected_count}[/bold] 个文件")
 
     with console.status("[cyan]规划重命名..."):
         engine = NamingEngine(ctx)
@@ -338,6 +340,8 @@ def report(directory, client, date, output, template, min_rating, exclude, forma
     selector.filter_by_rating(min_rating)
     if exclude:
         selector.filter_by_exclude_types([_parse_file_type(v) for v in exclude])
+
+    console.print(f"筛选后保留 [bold]{selector.selected_count}[/bold] 个文件")
 
     with console.status("[cyan]质量检查..."):
         checker = QualityChecker(result, ctx)
