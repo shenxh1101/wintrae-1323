@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "photodeliver"
+version = "0.1.0"
+description = "摄影交付文件批量整理命令行工具"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "PhotoDeliver Team"}]
+keywords = ["photography", "delivery", "organizer", "cli"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "click>=8.1.0",
+    "Pillow>=10.0.0",
+    "rich>=13.0.0",
+    "tqdm>=4.65.0",
+]
+
+[project.scripts]
+photodeliver = "photodeliver.cli:main"
+photo = "photodeliver.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
